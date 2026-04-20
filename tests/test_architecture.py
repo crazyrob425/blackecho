@@ -29,6 +29,21 @@ class ArchitectureTests(unittest.TestCase):
         self.assertTrue(uri.startswith("file://"))
         self.assertEqual([("echo-1", uri)], transport.calls)
 
+    def test_media_engine_streams_persona_audio_formats(self) -> None:
+        with TemporaryDirectory() as tmp:
+            for name in ("persona-alpha.mp3", "persona-beta.flac", "persona-gamma.WAV"):
+                transport = FakeTransport()
+                engine = LocalMediaStreamingEngine(transport)
+                source = Path(tmp) / name
+                source.write_bytes(b"\x00")
+
+                uri = engine.stream_file(
+                    StreamRequest(device_id="echo-dot-kitchen", source_file=source)
+                )
+
+                self.assertTrue(uri.endswith(name))
+                self.assertEqual([("echo-dot-kitchen", uri)], transport.calls)
+
     def test_media_engine_rejects_unsupported_extension(self) -> None:
         transport = FakeTransport()
         engine = LocalMediaStreamingEngine(transport)
@@ -38,6 +53,36 @@ class ArchitectureTests(unittest.TestCase):
             source.write_bytes(b"\x00")
             with self.assertRaises(ValueError):
                 engine.stream_file(StreamRequest(device_id="echo-1", source_file=source))
+
+        self.assertEqual([], transport.calls)
+
+    def test_media_engine_rejects_missing_or_non_file_source(self) -> None:
+        transport = FakeTransport()
+        engine = LocalMediaStreamingEngine(transport)
+
+        with TemporaryDirectory() as tmp:
+            missing = Path(tmp) / "missing.mp3"
+            with self.assertRaises(FileNotFoundError):
+                engine.stream_file(StreamRequest(device_id="echo-1", source_file=missing))
+
+            directory = Path(tmp) / "persona.wav"
+            directory.mkdir()
+            with self.assertRaises(FileNotFoundError):
+                engine.stream_file(StreamRequest(device_id="echo-1", source_file=directory))
+
+        self.assertEqual([], transport.calls)
+
+    def test_media_engine_requires_device_id(self) -> None:
+        transport = FakeTransport()
+        engine = LocalMediaStreamingEngine(transport)
+
+        with TemporaryDirectory() as tmp:
+            source = Path(tmp) / "persona.mp3"
+            source.write_bytes(b"ID3")
+            with self.assertRaises(ValueError):
+                engine.stream_file(StreamRequest(device_id=" ", source_file=source))
+
+        self.assertEqual([], transport.calls)
 
     def test_telemetry_killswitch_blocks_external_and_hot_mic(self) -> None:
         killswitch = TelemetryKillswitch("192.168.0.0/16")
