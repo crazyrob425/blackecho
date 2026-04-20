@@ -28,11 +28,11 @@ class LocalMediaStreamingEngine:
         source = request.source_file.expanduser().resolve()
         if not request.device_id.strip():
             raise ValueError("device_id cannot be empty or whitespace")
-        if not source.exists() or not source.is_file():
-            raise FileNotFoundError(source)
         suffix = source.suffix.lower()
         if suffix not in SUPPORTED_EXTENSIONS:
             raise ValueError(f"Unsupported media format: {suffix}")
+        if not source.exists() or not source.is_file():
+            raise FileNotFoundError(source)
 
         uri = source.as_uri()
         self._transport.send_stream(request.device_id, uri)

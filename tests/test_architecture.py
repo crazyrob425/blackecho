@@ -85,8 +85,12 @@ class ArchitectureTests(unittest.TestCase):
         with TemporaryDirectory() as tmp:
             source = Path(tmp) / "persona.mp3"
             source.write_bytes(b"ID3")
-            with self.assertRaises(ValueError):
-                engine.stream_file(StreamRequest(device_id=" ", source_file=source))
+            for device_id in ("", " ", "\t", "\n"):
+                with self.subTest(device_id=device_id):
+                    with self.assertRaises(ValueError):
+                        engine.stream_file(
+                            StreamRequest(device_id=device_id, source_file=source)
+                        )
 
         self.assertEqual([], transport.calls)
 
