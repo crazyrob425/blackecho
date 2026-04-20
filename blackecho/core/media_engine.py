@@ -25,9 +25,9 @@ class LocalMediaStreamingEngine:
         self._transport = transport
 
     def stream_file(self, request: StreamRequest) -> str:
-        source = request.source_file.expanduser().resolve()
         if not request.device_id.strip():
             raise ValueError("device_id cannot be empty or whitespace")
+        source = request.source_file.expanduser().resolve()
         suffix = source.suffix.lower()
         if suffix not in SUPPORTED_EXTENSIONS:
             raise ValueError(f"Unsupported media format: {suffix}")
