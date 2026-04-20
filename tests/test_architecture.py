@@ -34,6 +34,7 @@ class ArchitectureTests(unittest.TestCase):
         engine = LocalMediaStreamingEngine(transport)
 
         with TemporaryDirectory() as tmp:
+            # Includes mixed-case extension to verify case-insensitive allowlist checks.
             streamed = []
             for name in ("persona-alpha.mp3", "persona-beta.flac", "persona-gamma.WAV"):
                 source = Path(tmp) / name
@@ -85,7 +86,7 @@ class ArchitectureTests(unittest.TestCase):
         with TemporaryDirectory() as tmp:
             source = Path(tmp) / "persona.mp3"
             source.write_bytes(b"ID3")
-            for device_id in ("", " ", "\t", "\n"):
+            for device_id in ("", " ", "\t", "\n", "  \t\n  "):
                 with self.subTest(device_id=device_id):
                     with self.assertRaises(ValueError):
                         engine.stream_file(
