@@ -87,7 +87,7 @@ class ArchitectureTests(unittest.TestCase):
             source = Path(tmp) / "persona.mp3"
             source.write_bytes(b"ID3")
             for device_id in ("", " ", "\t", "\n", "  \t\n  "):
-                with self.subTest(device_id=device_id):
+                with self.subTest(invalid_device_id=device_id):
                     with self.assertRaises(ValueError):
                         engine.stream_file(
                             StreamRequest(device_id=device_id, source_file=source)
