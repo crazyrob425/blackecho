@@ -30,10 +30,12 @@ class ArchitectureTests(unittest.TestCase):
         self.assertEqual([("echo-1", uri)], transport.calls)
 
     def test_media_engine_streams_persona_audio_formats(self) -> None:
+        transport = FakeTransport()
+        engine = LocalMediaStreamingEngine(transport)
+
         with TemporaryDirectory() as tmp:
+            streamed = []
             for name in ("persona-alpha.mp3", "persona-beta.flac", "persona-gamma.WAV"):
-                transport = FakeTransport()
-                engine = LocalMediaStreamingEngine(transport)
                 source = Path(tmp) / name
                 source.write_bytes(b"\x00")
 
@@ -42,7 +44,9 @@ class ArchitectureTests(unittest.TestCase):
                 )
 
                 self.assertTrue(uri.endswith(name))
-                self.assertEqual([("echo-dot-kitchen", uri)], transport.calls)
+                streamed.append(("echo-dot-kitchen", uri))
+
+        self.assertEqual(streamed, transport.calls)
 
     def test_media_engine_rejects_unsupported_extension(self) -> None:
         transport = FakeTransport()
@@ -65,10 +69,12 @@ class ArchitectureTests(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 engine.stream_file(StreamRequest(device_id="echo-1", source_file=missing))
 
-            directory = Path(tmp) / "persona.wav"
-            directory.mkdir()
+            directory_path = Path(tmp) / "persona.wav"
+            directory_path.mkdir()
             with self.assertRaises(FileNotFoundError):
-                engine.stream_file(StreamRequest(device_id="echo-1", source_file=directory))
+                engine.stream_file(
+                    StreamRequest(device_id="echo-1", source_file=directory_path)
+                )
 
         self.assertEqual([], transport.calls)
 
