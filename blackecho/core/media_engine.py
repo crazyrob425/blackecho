@@ -27,7 +27,7 @@ class LocalMediaStreamingEngine:
     def stream_file(self, request: StreamRequest) -> str:
         source = request.source_file.expanduser().resolve()
         if not request.device_id.strip():
-            raise ValueError("device_id is required")
+            raise ValueError("device_id cannot be empty or whitespace")
         if not source.exists() or not source.is_file():
             raise FileNotFoundError(source)
         suffix = source.suffix.lower()
