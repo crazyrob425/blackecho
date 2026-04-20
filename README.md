@@ -1,6 +1,6 @@
-# blackecho
+# 🌌 BlackEcho
 
-BlackEcho is a local-first Amazon Echo experimentation toolkit with a modular architecture.
+BlackEcho is a local-first Amazon Echo experimentation toolkit with a modular architecture for media injection, privacy controls, and future modding extensions.
 
 ## Current foundation
 
@@ -16,3 +16,7 @@ BlackEcho is a local-first Amazon Echo experimentation toolkit with a modular ar
 - `/blackecho/plugins` — plugin manifest and catalog APIs
 - `/blackecho/ui` — dashboard models and HTML mock view
 - `/tests` — focused unit tests for foundational modules
+
+## Disclaimer
+
+This project is for educational and research purposes.
